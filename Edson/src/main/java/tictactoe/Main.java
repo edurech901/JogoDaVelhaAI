@@ -5,7 +5,6 @@ import java.util.Scanner;
 
 public class Main {
 
-    // Método para exibir o mapa de posições
     public static void mapaDePosicoes() {
         System.out.println("╔════════════════════════════╗");
         System.out.println("║     MAPA DE POSIÇÕES       ║");
@@ -20,12 +19,10 @@ public class Main {
         System.out.println("══════════════════════════════\n");
     }
 
-    // Método para criar o tabuleiro
     public static int[] criarBoard() {
         return new int[9];
     }
 
-    // Método para exibir o tabuleiro atual
     public static void exibirBoard(int[] board) {
         System.out.println("╔════════════════════════════╗");
         System.out.println("║     TABULEIRO ATUAL        ║");
@@ -47,7 +44,6 @@ public class Main {
         System.out.println("══════════════════════════════\n");
     }
 
-    // Método para fazer uma jogada
     public static boolean fazerJogada(int[] board, int posicao, int jogador) {
         if (posicao < 1 || posicao > 9) {
             System.out.println("Número fora do intervalo. Escolha uma posição entre 1 e 9.");
@@ -63,7 +59,6 @@ public class Main {
         return true;
     }
 
-    // Método para obter a posição do jogador
     public static int obterPosicaoJogador(Scanner scanner) {
         while (true) {
             System.out.println("Escolha uma posição de (1-9):");
@@ -76,7 +71,6 @@ public class Main {
         }
     }
 
-    // Método para determinar o melhor movimento do computador
     public static int melhorMovimento(int[] board) {
         int pontuacao, maiorPontuacao = Integer.MIN_VALUE, melhorMovimento = -1;
         for (int i = 0; i < board.length; i++) {
@@ -93,7 +87,6 @@ public class Main {
         return melhorMovimento;
     }
 
-    // Método para prever o movimento
     public static int previsaoMovimento(int[] board, int movimento, boolean jogadorAtual, int movimentosFeitos) {
         switch (verificarVencedor(board)) {
             case 'C' -> {
@@ -122,7 +115,6 @@ public class Main {
         return 0;
     }
 
-    // Método para verificar o vencedor
     public static char verificarVencedor(int[] board) {
         int[][] combinacoesVitoria = {
                 {0, 1, 2}, {3, 4, 5}, {6, 7, 8},
@@ -143,7 +135,6 @@ public class Main {
         return 'E';
     }
 
-    // Método para mostrar o vencedor
     public static void mostrarVencedor(char vencedor) {
         System.out.println("╔════════════════════════════╗");
         System.out.println("║       RESULTADO FINAL      ║");
@@ -156,7 +147,6 @@ public class Main {
         System.out.println("══════════════════════════════\n");
     }
 
-    // Método principal
     public static void main(String[] args) {
         int jogador = 1, computador = 2;
         Scanner scanner = new Scanner(System.in);
