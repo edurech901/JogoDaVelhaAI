@@ -5,52 +5,82 @@ import java.util.Scanner;
 
 public class Main {
 
+    // Método para exibir o mapa de posições
     public static void mapaDePosicoes() {
-        System.out.println("Mapa de posições:");
-        System.out.println("1 | 2 | 3");
-        System.out.println("4 | 5 | 6");
-        System.out.println("7 | 8 | 9");
-        System.out.println();
+        System.out.println("╔════════════════════════════╗");
+        System.out.println("║     MAPA DE POSIÇÕES       ║");
+        System.out.println("╚════════════════════════════╝");
+        System.out.println("   |   ");
+        System.out.println("   |   ");
+        System.out.println("  \\|/ ");
+        System.out.println("   V   \n");
+        System.out.println("  1 | 2 | 3");
+        System.out.println("  4 | 5 | 6");
+        System.out.println("  7 | 8 | 9");
+        System.out.println("══════════════════════════════\n");
     }
 
+    // Método para criar o tabuleiro
     public static int[] criarBoard() {
         return new int[9];
     }
 
+    // Método para exibir o tabuleiro atual
     public static void exibirBoard(int[] board) {
-        System.out.println("Tabuleiro atual:");
+        System.out.println("╔════════════════════════════╗");
+        System.out.println("║     TABULEIRO ATUAL        ║");
+        System.out.println("╚════════════════════════════╝");
+
         for (int i = 0; i < board.length; i++) {
             switch (board[i]) {
-                case 0 -> System.out.print("-");
+                case 0 -> System.out.print((i + 1));
                 case 1 -> System.out.print("X");
                 case 2 -> System.out.print("O");
-                default -> {
-                }
             }
-            if (i == 0 || i == 1 || i == 3 || i == 4 || i == 6 || i == 7) {
+            if (i % 3 != 2) {
                 System.out.print(" | ");
-            }
-            if ((i + 1) % 3 == 0) {
+            } else {
                 System.out.println();
             }
         }
-        System.out.println();
+
+        System.out.println("══════════════════════════════\n");
     }
 
+    // Método para fazer uma jogada
     public static boolean fazerJogada(int[] board, int posicao, int jogador) {
-        if (posicao < 1 || posicao > 9 || board[posicao - 1] != 0) {
-            System.out.println("Posição inválida ou já ocupada.");
+        if (posicao < 1 || posicao > 9) {
+            System.out.println("Número fora do intervalo. Escolha uma posição entre 1 e 9.");
             return false;
         }
+
+        if (board[posicao - 1] != 0) {
+            System.out.println("Ops! Essa posição já está ocupada. Tente outra.");
+            return false;
+        }
+
         board[posicao - 1] = jogador;
         return true;
     }
 
+    // Método para obter a posição do jogador
+    public static int obterPosicaoJogador(Scanner scanner) {
+        while (true) {
+            System.out.println("Escolha uma posição de (1-9):");
+            String entrada = scanner.nextLine();
+            if (entrada.matches("[1-9]")) {
+                return Integer.parseInt(entrada);
+            } else {
+                System.out.println("Entrada inválida. Digite um número de 1 a 9.");
+            }
+        }
+    }
+
+    // Método para determinar o melhor movimento do computador
     public static int melhorMovimento(int[] board) {
         int pontuacao, maiorPontuacao = Integer.MIN_VALUE, melhorMovimento = -1;
         for (int i = 0; i < board.length; i++) {
             if (board[i] == 0) {
-                System.out.println("Analisando posição " + (i + 1));
                 board[i] = 2;
                 pontuacao = previsaoMovimento(board, i, true, 0);
                 board[i] = 0;
@@ -60,10 +90,10 @@ public class Main {
                 }
             }
         }
-
         return melhorMovimento;
     }
 
+    // Método para prever o movimento
     public static int previsaoMovimento(int[] board, int movimento, boolean jogadorAtual, int movimentosFeitos) {
         switch (verificarVencedor(board)) {
             case 'C' -> {
@@ -76,32 +106,14 @@ public class Main {
                 return 0;
             }
             case 'N' -> {
-                int melhor;
-                if (jogadorAtual) {
-                    melhor = Integer.MAX_VALUE;
-                } else {
-                    melhor = Integer.MIN_VALUE;
-                }
+                int melhor = jogadorAtual ? Integer.MAX_VALUE : Integer.MIN_VALUE;
                 for (int i = 0; i < board.length; i++) {
-                    if (jogadorAtual) {
-                        if (board[i] == 0) {
-                            board[i] = 1;
-                            int tentativa = previsaoMovimento(board, movimento, false, movimentosFeitos + 1);
-                            board[i] = 0;
-                            if (tentativa < melhor) {
-                                melhor = tentativa;
-                            }
-                        }
-                    } else {
-                        if (board[i] == 0) {
-                            board[i] = 2;
-                            int tentativa = previsaoMovimento(board, movimento, true, movimentosFeitos + 1);
-                            board[i] = 0;
-                            if (tentativa > melhor) {
-                                melhor = tentativa;
-                            }
-                        }
-
+                    if (board[i] == 0) {
+                        board[i] = jogadorAtual ? 1 : 2;
+                        int tentativa = previsaoMovimento(board, movimento, !jogadorAtual, movimentosFeitos + 1);
+                        board[i] = 0;
+                        if (jogadorAtual && tentativa < melhor) melhor = tentativa;
+                        if (!jogadorAtual && tentativa > melhor) melhor = tentativa;
                     }
                 }
                 return melhor;
@@ -110,99 +122,147 @@ public class Main {
         return 0;
     }
 
+    // Método para verificar o vencedor
     public static char verificarVencedor(int[] board) {
         int[][] combinacoesVitoria = {
-                { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, // Linhas
-                { 0, 3, 6 }, { 1, 4, 7 }, { 2, 5, 8 }, // Colunas
-                { 0, 4, 8 }, { 2, 4, 6 } // Diagonais
+                {0, 1, 2}, {3, 4, 5}, {6, 7, 8},
+                {0, 3, 6}, {1, 4, 7}, {2, 5, 8},
+                {0, 4, 8}, {2, 4, 6}
         };
 
-        for (int[] combinacao : combinacoesVitoria) {
-            if (board[combinacao[0]] != 0 &&
-                    board[combinacao[0]] == board[combinacao[1]] &&
-                    board[combinacao[0]] == board[combinacao[2]]) {
-                if (board[combinacao[0]] == 1)
-                    return 'P';
-                else
-                    return 'C';
+        for (int[] c : combinacoesVitoria) {
+            if (board[c[0]] != 0 && board[c[0]] == board[c[1]] && board[c[0]] == board[c[2]]) {
+                return board[c[0]] == 1 ? 'P' : 'C';
             }
         }
+
         for (int valor : board) {
-            if (valor == 0) {
-                return 'N';
-            }
+            if (valor == 0) return 'N';
         }
+
         return 'E';
     }
 
+    // Método para mostrar o vencedor
     public static void mostrarVencedor(char vencedor) {
+        System.out.println("╔════════════════════════════╗");
+        System.out.println("║       RESULTADO FINAL      ║");
+        System.out.println("╚════════════════════════════╝");
         switch (vencedor) {
-            case 'P' -> {
-                System.out.println("O jogador venceu!");
-            }
+            case 'P' -> System.out.println("O jogador venceu!");
             case 'C' -> System.out.println("O computador venceu!");
             case 'E' -> System.out.println("Empate!");
-            default -> {
+        }
+        System.out.println("══════════════════════════════\n");
+    }
+
+    // Método principal
+    public static void main(String[] args) {
+        int jogador = 1, computador = 2;
+        Scanner scanner = new Scanner(System.in);
+        int vitorias = 0, derrotas = 0, empates = 0;
+
+        System.out.println("╔═════════════════════════════════════╗");
+        System.out.println("║     BEM-VINDO AO JOGO DA VELHA!     ║");
+        System.out.println("╚═════════════════════════════════════╝\n");
+        mapaDePosicoes();
+
+        boolean continuarJogando = true;
+
+        while (continuarJogando) {
+            int[] board = criarBoard();
+            boolean playerAtual;
+
+            while (true) {
+                System.out.println("╔════════════════════════════════════════════════════╗");
+                System.out.println("║ Deseja iniciar jogando? (s/n)                      ║");
+                System.out.println("╚════════════════════════════════════════════════════╝");
+                String resposta = scanner.nextLine().trim().toLowerCase();
+
+                if (resposta.equals("s")) {
+                    playerAtual = true;
+                    break;
+                } else if (resposta.equals("n")) {
+                    int movimentoComputador = new Random().nextInt(9);
+                    fazerJogada(board, movimentoComputador + 1, computador);
+                    System.out.println("Computador escolheu a posição " + (movimentoComputador + 1));
+                    playerAtual = false;
+                    break;
+                } else {
+                    System.out.println("Entrada inválida. Digite 's' para sim ou 'n' para não.");
+                }
+            }
+
+            exibirBoard(board);
+
+            while (true) {
+                char resultado = verificarVencedor(board);
+                if (resultado != 'N') {
+                    mostrarVencedor(resultado);
+
+                    switch (resultado) {
+                        case 'P' -> vitorias++;
+                        case 'C' -> derrotas++;
+                        case 'E' -> empates++;
+                    }
+
+                    System.out.println("╔════════════════════════════╗");
+                    System.out.println("║         PLACAR FINAL       ║");
+                    System.out.println("╚════════════════════════════╝");
+                    System.out.println("Vitórias: " + vitorias);
+                    System.out.println("Derrotas: " + derrotas);
+                    System.out.println("Empates : " + empates);
+                    System.out.println("══════════════════════════════\n");
+
+                    while (true) {
+                        System.out.println("╔════════════════════════════╗");
+                        System.out.println("║ Deseja jogar novamente? (s/n) ║");
+                        System.out.println("╚════════════════════════════╝");
+                        String resposta = scanner.nextLine().trim().toLowerCase();
+
+                        if (resposta.equals("s")) {
+                            System.out.println("\nReiniciando partida...\n");
+                            break;
+                        } else if (resposta.equals("n")) {
+                            System.out.println("╔════════════════════════════╗");
+                            System.out.println("║     OBRIGADO POR JOGAR!    ║");
+                            System.out.println("║    Até a próxima partida!  ║");
+                            System.out.println("╚════════════════════════════╝");
+                            continuarJogando = false;
+                            return;
+                        } else {
+                            System.out.println("Entrada inválida. Digite 's' para sim ou 'n' para não.");
+                        }
+                    }
+                    break;
+                }
+
+                if (playerAtual) {
+                    while (true) {
+                        System.out.println("╔════════════════════════════╗");
+                        System.out.println("║       SUA VEZ DE JOGAR     ║");
+                        System.out.println("╚════════════════════════════╝");
+
+                        int posicao = obterPosicaoJogador(scanner);
+
+                        boolean jogadaValida = fazerJogada(board, posicao, jogador);
+                        if (jogadaValida) {
+                            exibirBoard(board);
+                            playerAtual = false;
+                            break;
+                        }
+                    }
+                } else {
+                    System.out.println("╔════════════════════════════╗");
+                    System.out.println("║     VEZ DO COMPUTADOR      ║");
+                    System.out.println("╚════════════════════════════╝");
+                    int movimentoComputador = melhorMovimento(board);
+                    fazerJogada(board, movimentoComputador + 1, computador);
+                    System.out.println("Computador escolheu a posição " + (movimentoComputador + 1));
+                    exibirBoard(board);
+                    playerAtual = true;
+                }
             }
         }
     }
-
-    public static void main(String[] args) {
-        int jogador = 1;
-        int computador = 2;
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Bem-vindo ao Jogo da Velha!");
-        mapaDePosicoes();
-        boolean playerAtual; // true para jogador, false para computador
-        int[] board = criarBoard();
-        exibirBoard(board);
-        while (true) {
-            System.out.println("Deseja começar o jogo? (s/n)");
-            String resposta = scanner.nextLine().toLowerCase();
-            if (resposta.equals("n")) {
-                Random random = new Random();
-                int movimentoComputador = random.nextInt(9);
-                fazerJogada(board, (movimentoComputador + 1), computador);
-                System.out.println("Computador escolheu a posição " + (movimentoComputador + 1));
-                exibirBoard(board);
-                playerAtual = true;
-                break;
-            } else if (resposta.equals("s")) {
-                playerAtual = true;
-                break;
-            } else {
-                System.out.println("Resposta inválida. Por favor, responda com 's' ou 'n'.");
-            }
-        }
-        while (true) {
-
-            if (verificarVencedor(board) != 'N') {
-                mostrarVencedor(verificarVencedor(board));
-                return;
-            }
-            if (playerAtual) {
-                while (true) {
-                    mapaDePosicoes();
-                    exibirBoard(board);
-                    System.out.println("Sua vez! Escolha uma posição (1-9):");
-                    int posicao;
-                    posicao = scanner.nextInt();
-                    boolean jogadaValida = fazerJogada(board, posicao, jogador);
-                    exibirBoard(board);
-                    playerAtual = false;
-                    if (jogadaValida) {
-                        break;
-                    }
-                }
-            } else {
-                System.out.println("Vez do computador:");
-                int movimentoComputador = melhorMovimento(board);
-                fazerJogada(board, (movimentoComputador + 1), computador);
-                System.out.println("Computador escolheu a posição " + (movimentoComputador + 1));
-                exibirBoard(board);
-                playerAtual = true;
-            }
-        }
-}
-
 }
