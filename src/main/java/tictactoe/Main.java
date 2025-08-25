@@ -1,5 +1,6 @@
 package tictactoe;
 
+import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
@@ -17,6 +18,7 @@ public class Main {
     }
 
     public static void exibirBoard(int[] board) {
+        System.out.println("Tabuleiro atual:");
         for (int i = 0; i < board.length; i++) {
             switch (board[i]) {
                 case 0 -> System.out.print("-");
@@ -45,7 +47,7 @@ public class Main {
     }
 
     public static int melhorMovimento(int[] board) {
-        int pontuacao = 0, maiorPontuacao = Integer.MIN_VALUE, melhorMovimento = -1;
+        int pontuacao, maiorPontuacao = Integer.MIN_VALUE, melhorMovimento = -1;
         for (int i = 0; i < board.length; i++) {
             if (board[i] == 0) {
                 System.out.println("Analisando posição " + (i + 1));
@@ -65,24 +67,25 @@ public class Main {
     public static int previsaoMovimento(int[] board, int movimento, boolean jogadorAtual, int movimentosFeitos) {
         switch (verificarVencedor(board)) {
             case 'C' -> {
-                System.out.println("Venceu na posição " + movimento);
                 return 10 - movimentosFeitos;
             }
             case 'P' -> {
-                System.out.println("Perdeu na posição " + movimento);
-                return 10 + movimentosFeitos;
+                return -10 + movimentosFeitos;
             }
             case 'E' -> {
-                System.out.println("Empatou na posição " + movimento);
                 return 0;
             }
             case 'N' -> {
-                int melhor = 0;
+                int melhor;
+                if (jogadorAtual) {
+                    melhor = Integer.MAX_VALUE;
+                } else {
+                    melhor = Integer.MIN_VALUE;
+                }
                 for (int i = 0; i < board.length; i++) {
                     if (jogadorAtual) {
                         if (board[i] == 0) {
                             board[i] = 1;
-                            System.out.println("foi para a posição " + movimento);
                             int tentativa = previsaoMovimento(board, movimento, false, movimentosFeitos + 1);
                             board[i] = 0;
                             if (tentativa < melhor) {
@@ -92,15 +95,16 @@ public class Main {
                     } else {
                         if (board[i] == 0) {
                             board[i] = 2;
-                            System.out.println("foi para a posição " + movimento);
                             int tentativa = previsaoMovimento(board, movimento, true, movimentosFeitos + 1);
                             board[i] = 0;
                             if (tentativa > melhor) {
                                 melhor = tentativa;
                             }
                         }
+
                     }
                 }
+                return melhor;
             }
         }
         return 0;
@@ -125,7 +129,7 @@ public class Main {
         }
         for (int valor : board) {
             if (valor == 0) {
-                return 'N'; // Jogo não terminou
+                return 'N';
             }
         }
         return 'E';
@@ -151,12 +155,17 @@ public class Main {
         mapaDePosicoes();
         boolean playerAtual; // true para jogador, false para computador
         int[] board = criarBoard();
-
+        exibirBoard(board);
         while (true) {
             System.out.println("Deseja começar o jogo? (s/n)");
             String resposta = scanner.nextLine().toLowerCase();
             if (resposta.equals("n")) {
-                playerAtual = false;
+                Random random = new Random();
+                int movimentoComputador = random.nextInt(9);
+                fazerJogada(board, (movimentoComputador + 1), computador);
+                System.out.println("Computador escolheu a posição " + (movimentoComputador + 1));
+                exibirBoard(board);
+                playerAtual = true;
                 break;
             } else if (resposta.equals("s")) {
                 playerAtual = true;
@@ -167,17 +176,24 @@ public class Main {
         }
         while (true) {
 
-            if (verificarVencedor(board) == 'P' || verificarVencedor(board) == 'C') {
+            if (verificarVencedor(board) != 'N') {
                 mostrarVencedor(verificarVencedor(board));
                 return;
             }
             if (playerAtual) {
-                System.out.println("Sua vez! Escolha uma posição (1-9):");
-                int posicao;
-                posicao = scanner.nextInt();
-                fazerJogada(board, posicao, jogador);
-                exibirBoard(board);
-                playerAtual = false;
+                while (true) {
+                    mapaDePosicoes();
+                    exibirBoard(board);
+                    System.out.println("Sua vez! Escolha uma posição (1-9):");
+                    int posicao;
+                    posicao = scanner.nextInt();
+                    boolean jogadaValida = fazerJogada(board, posicao, jogador);
+                    exibirBoard(board);
+                    playerAtual = false;
+                    if (jogadaValida) {
+                        break;
+                    }
+                }
             } else {
                 System.out.println("Vez do computador:");
                 int movimentoComputador = melhorMovimento(board);
@@ -187,6 +203,6 @@ public class Main {
                 playerAtual = true;
             }
         }
-    }
+}
 
 }
