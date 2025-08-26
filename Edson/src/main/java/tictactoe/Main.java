@@ -30,7 +30,7 @@ public class Main {
 
         for (int i = 0; i < board.length; i++) {
             switch (board[i]) {
-                case 0 -> System.out.print((i + 1));
+                case 0 -> System.out.print("-");
                 case 1 -> System.out.print("X");
                 case 2 -> System.out.print("O");
             }
@@ -174,11 +174,14 @@ public class Main {
                     break;
                 } else if (resposta.equals("n")) {
                     int movimentoComputador = new Random().nextInt(9);
-                    fazerJogada(board, movimentoComputador + 1, computador);
+                    while (!fazerJogada(board, movimentoComputador + 1, computador)) {
+                        movimentoComputador = new Random().nextInt(9);
+                    }
                     System.out.println("Computador escolheu a posição " + (movimentoComputador + 1));
-                    playerAtual = false;
+                    playerAtual = true;
                     break;
-                } else {
+                }
+                else {
                     System.out.println("Entrada inválida. Digite 's' para sim ou 'n' para não.");
                 }
             }
